@@ -46,3 +46,8 @@ cat >> /etc/hosts << EOF
 EOF
 ```
 If your cluster has N nodes, we need to modify the /etc/hosts file on each node and add the hostname for all nodes. This allows each node to identify the hostnames of the other nodes.
+
+**Note:** In Vagrantfile, we using<br>
+`sed -i 's|^Environment="KUBELET_CONFIG_ARGS=.*|Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml --node-ip=192.168.1.200"|' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf`
+<br>
+to make sure master node in k8s cluster using private node IP 192.168.1.200 instead of 10.\*.\*.\* IP from bridge interface.
