@@ -1,0 +1,38 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/jammy64"
+  config.vm.network "public_network", bridge: "enp5s0", ip: "192.168.1.200"
+  config.vm.hostname = "master.rainscales"
+  config.ssh.insert_key = false
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.name = "master.rainscales"
+    vb.cpus = 4
+    vb.memory = "5120"
+  end
+
+
+  # Run the install-docker-kube.sh script after the box is provisioned
+  config.vm.provision "shell", path: "./../install-docker-kube.sh"
+
+  # Run additional shell commands
+  config.vm.provision "shell", inline: <<-SHELL
+    # Set password to '123' for the root account and allow SSH login
+echo 'root:123' | chpasswd
+sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
+sed -i 's/^#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+systemctl reload sshd
+sed -i 's|^Environment="KUBELET_CONFIG_ARGS=.*|Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml --node-ip=192.168.1.200"|' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+systemctl daemon-reload
+systemctl restart kubelet
+
+
+# Add entries to /etc/hosts file for accessing machines via hostname
+cat >> /etc/hosts << EOF
+192.168.1.200 master.rainscales
+EOF
+
+SHELL
+end
