@@ -116,7 +116,7 @@ kubectl apply -f kubernetes/installation/metallb/l2-advertisement.yml
 ```
 
 In `pool-1.yaml` file
-```bash
+```yaml
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
