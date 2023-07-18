@@ -1,0 +1,17 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nuclio-dashboard
+  namespace: nuclio
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`rainscales.dashboard.com`)
+      kind: Rule
+      services:
+        - name: nuclio-dashboard
+          port: 8070
